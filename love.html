@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>For You ❤️</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Shadows+Into+Light&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="preload" as="audio" href="fx/click.wav">
+    <link rel="preload" as="audio" href="fx/sparkle.wav">
+    <link rel="preload" as="audio" href="fx/toy.wav">
+    <link rel="preload" as="audio" href="fx/woof.wav">
+
+
+
+
+    <!-- Preload custom cursor for reliability -->
+    <link rel="preload" as="image" href="text/cursor.png">
+
+    <style>
+        :root {
+            --bg1: #fff5f8;
+            --bg2: #ffeef6;
+            --ink: #1f2330;
+            --accent: #ff5c8a;
+            /* change to his favorite color */
+            --card: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(1200px 1200px at 20% -10%, var(--bg2), transparent 60%),
+                radial-gradient(1000px 1000px at 120% 10%, var(--bg2), transparent 50%),
+                linear-gradient(180deg, var(--bg1), #fff);
+            min-height: 100dvh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+        }
+
+        .card {
+            width: min(720px, 96vw);
+            background: var(--card);
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
+            padding: 28px 24px 18px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        h1 {
+            margin: 8px 0 4px;
+            font-weight: 800;
+            letter-spacing: .2px;
+            font-size: clamp(24px, 3.5vw, 34px);
+        }
+
+        .sub {
+            opacity: .8;
+            margin: 0 0 18px;
+            font-size: 14px;
+        }
+
+        /* Timer */
+        .timer {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 16px 0 8px;
+        }
+
+        .pill {
+            background: #fff2f6;
+            border: 1px solid #ffe0ec;
+            border-radius: 14px;
+            padding: 12px 10px;
+            text-align: center;
+        }
+
+        .pill .big {
+            display: block;
+            font-size: clamp(20px, 4vw, 28px);
+            font-weight: 800;
+            color: var(--accent);
+            line-height: 1.1;
+        }
+
+        .pill .label {
+            font-size: 12px;
+            opacity: .75;
+            margin-top: 4px;
+        }
+
+        /* Reason / buttons / note */
+        .reason {
+            background: #f9fbff;
+            border: 1px solid #e7ecff;
+            border-radius: 16px;
+            padding: 16px;
+            margin: 18px 0 8px;
+            min-height: 64px;
+            display: grid;
+            place-items: center;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 999px;
+            padding: 10px 16px;
+            font-weight: 600;
+            background: var(--accent);
+            color: white;
+            transition: transform .08s ease, filter .2s ease;
+        }
+
+        button:active {
+            transform: translateY(1px)
+        }
+
+        .ghost {
+            background: transparent;
+            color: var(--accent);
+            border: 1.5px solid var(--accent);
+        }
+
+        .note {
+            margin-top: 10px;
+            border-radius: 16px;
+            border: 1px dashed #ffd1e1;
+            padding: 14px;
+            background: #fff9fb;
+            line-height: 1.55;
+            display: none;
+        }
+
+        .note.show {
+            display: block;
+            animation: fade .25s ease
+        }
+
+        @keyframes fade {
+            from {
+                opacity: 0;
+                transform: translateY(4px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        /* Falling hearts */
+        .heart {
+            position: fixed;
+            top: -20px;
+            font-size: 16px;
+            color: var(--accent);
+            animation: fall linear forwards;
+            pointer-events: none;
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .1));
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(360deg);
+                opacity: .9;
+            }
+        }
+
+        footer {
+            margin-top: 10px;
+            font-size: 12px;
+            opacity: .6;
+            text-align: center;
+        }
+
+        /* --- Photo Shuffler (base) --- */
+        .gallery {
+            margin: 16px 0 8px;
+            background: #fff;
+            border: 1px solid #f1f1f4;
+            border-radius: 16px;
+            padding: 14px;
+        }
+
+        .photo-frame {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+            border: 1px solid #e9e9ee;
+            padding: 12px 12px 48px;
+            box-shadow: 0 18px 30px rgba(0, 0, 0, .12), 0 4px 10px rgba(0, 0, 0, .06);
+            transform: rotate(var(--tilt, 0deg));
+            transition: transform .25s ease;
+        }
+
+        .photo-frame::before {
+            content: "";
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-2deg);
+            width: 120px;
+            height: 24px;
+            border-radius: 6px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, .75), rgba(255, 255, 255, .5));
+            border: 1px solid rgba(0, 0, 0, .06);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, .08);
+            mix-blend-mode: multiply;
+        }
+
+        .photo-frame img {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            object-fit: cover;
+            border-radius: 8px;
+            display: block;
+            opacity: 0;
+            transform: scale(1.01);
+            transition: opacity .25s ease, transform .25s ease;
+        }
+
+        .photo-frame img.show {
+            opacity: 1;
+            transform: none;
+        }
+
+        .photo-frame .caption {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 10px;
+            text-align: center;
+            background: transparent;
+            color: #2a2a2e;
+            font-family: "Shadows Into Light", Inter, system-ui, sans-serif;
+            font-size: 16px;
+            letter-spacing: .2px;
+            padding: 0;
+            user-select: none;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .controls .spacer {
+            flex: 1 1 auto;
+        }
+
+        .icon-btn {
+            cursor: pointer;
+            border: 1.5px solid var(--accent);
+            background: #fff;
+            color: var(--accent);
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-weight: 600;
+        }
+
+        .icon-btn.filled {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .counter {
+            font-size: 12px;
+            opacity: .7;
+        }
+
+        /* --- Mini Playlist Player --- */
+        .player {
+            margin: 16px 0 8px;
+            background: #fff;
+            border: 1px solid #f1f1f4;
+            border-radius: 16px;
+            padding: 14px;
+            outline: none;
+        }
+
+        .player-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .player-cover {
+            position: relative;
+            width: 56px;
+            height: 56px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f5f5f7, #ececf3);
+            border: 1px solid #e9e9ee;
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+            color: #666;
+        }
+
+        .player-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .player-cover span {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+        }
+
+        .player-cover.has-cover img {
+            display: block;
+        }
+
+        .player-cover.has-cover span {
+            display: none;
+        }
+
+        .player-text {
+            line-height: 1.25
+        }
+
+        .player-title {
+            font-weight: 700
+        }
+
+        .player-artist {
+            font-size: 12px;
+            opacity: .7
+        }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .pbtn {
+            cursor: pointer;
+            border: 1.5px solid var(--accent);
+            background: #fff;
+            color: var(--accent);
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-weight: 600;
+        }
+
+        .pbtn.filled {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .player-bar {
+            display: grid;
+            grid-template-columns: 42px 1fr 42px;
+            gap: 8px;
+            align-items: center;
+            margin-top: 8px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .player-bar input[type="range"] {
+            width: 100%
+        }
+
+        .player-extra {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .player video {
+            margin-top: 10px;
+            width: 100%;
+            max-height: 240px;
+            border-radius: 12px;
+            display: none;
+            border: 1px solid #e9e9ee;
+        }
+
+        .player video.show {
+            display: block;
+        }
+
+        /* Turn off bold on specific elements (you asked for this earlier) */
+        h1 {
+            font-weight: 400;
+        }
+
+        .pill .big {
+            font-weight: 400;
+        }
+
+        button,
+        .icon-btn,
+        .pbtn {
+            font-weight: 400;
+        }
+
+        .player-title {
+            font-weight: 400;
+        }
+
+        /* Accessible hidden H1 */
+        .sr-only {
+            position: absolute !important;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Hand-drawn title image (base) — inside .title-wrap we override size */
+        .hand-title {
+            display: block;
+            height: auto;
+            margin: 8px 0 4px;
+        }
+
+        /* === Cozy Pixel Theme Overrides === */
+        body {
+            font-family: 'Press Start 2P', cursive, monospace;
+            font-size: 12px;
+            background: repeating-linear-gradient(45deg, #fcefee, #fcefee 20px, #f8e4e7 20px, #f8e4e7 40px);
+            image-rendering: pixelated;
+        }
+
+        .card {
+            background: #fffdf9;
+            border: 4px solid #3a2f2f;
+            border-radius: 0;
+            box-shadow: 8px 8px 0 #a85454;
+            padding: 16px;
+        }
+
+        /* keep title image crisp but no border (you asked to remove border later) */
+        .hand-title {
+            image-rendering: pixelated;
+            border: 0;
+            outline: none;
+            box-shadow: none;
+        }
+
+        .pill {
+            border: 3px solid #3a2f2f;
+            background: #ffe9f3;
+            border-radius: 0;
+            padding: 8px;
+        }
+
+        button,
+        .icon-btn,
+        .pbtn {
+            font-family: 'Press Start 2P', cursive, monospace;
+            border: 3px solid #3a2f2f;
+            border-radius: 0;
+            background: #ffd6e6;
+            color: #1f1f1f;
+            padding: 6px 10px;
+            box-shadow: 4px 4px 0 #c7b8b8;
+            transition: transform .1s;
+        }
+
+        button:active,
+        .icon-btn:active,
+        .pbtn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #c7b8b8;
+        }
+
+        .reason,
+        .note,
+        .gallery,
+        .player {
+            border: 3px solid #3a2f2f;
+            border-radius: 0;
+            background: #fffaf5;
+            box-shadow: 4px 4px 0 #c7b8b8;
+        }
+
+        .photo-frame img {
+            image-rendering: pixelated;
+        }
+
+        /* Use 8-bit fonts across UI for vibe */
+        html,
+        body,
+        .card,
+        .reason,
+        .note,
+        .gallery,
+        .player,
+        .pill,
+        button,
+        .icon-btn,
+        .pbtn,
+        .sub,
+        .counter,
+        .player-title,
+        .player-artist,
+        .caption {
+            font-family: 'Silkscreen', 'Press Start 2P', monospace !important;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+        }
+
+        h1,
+        h2,
+        h3,
+        .player-title {
+            font-family: 'Press Start 2P', 'Silkscreen', monospace !important;
+            font-weight: 400;
+        }
+
+        body {
+            font-size: 14px;
+        }
+
+        html {
+            -webkit-font-smoothing: none;
+            -moz-osx-font-smoothing: auto;
+        }
+
+        /* === Pixel characters flanking the title === */
+        .title-wrap {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 12px;
+            margin: 8px 0 12px;
+        }
+
+        .char-sprite {
+            width: clamp(56px, 10vw, 96px);
+            aspect-ratio: 1 / 1;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            border: 0;
+            box-shadow: none;
+        }
+
+        .title-wrap .hand-title {
+            width: auto;
+            max-width: min(520px, 70vw);
+            height: auto;
+            margin: 0;
+            border: 0;
+            box-shadow: none;
+        }
+
+        @keyframes bob {
+
+            0%,
+            100% {
+                transform: translateY(0)
+            }
+
+            50% {
+                transform: translateY(-2px)
+            }
+        }
+
+        .char-sprite.left {
+            animation: bob 2.2s ease-in-out infinite;
+        }
+
+        .char-sprite.right {
+            animation: bob 2.2s ease-in-out infinite .6s;
+        }
+
+        @media (max-width: 520px) {
+            .title-wrap {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .title-wrap .hand-title {
+                order: 1;
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .char-sprite {
+                order: 2;
+                width: 64px;
+            }
+        }
+
+        /* === SAFE custom pixel cursor (scoped) === */
+        body {
+            cursor: url("text/cursor.png") 2 2, auto !important;
+        }
+
+        input,
+        textarea {
+            cursor: text !important;
+        }
+
+        a,
+        button,
+        .icon-btn,
+        .pbtn,
+        [role="button"],
+        .controls button {
+            cursor: url("text/cursor.png") 2 2, pointer !important;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="card">
+        <p class="sub" id="subtitle">From <b>Me</b> to <b>You</b></p>
+        <h1 id="headline" class="sr-only">hi timothy suh. i made you a tiny website</h1>
+
+        <div class="title-wrap">
+            <img class="char-sprite left" src="char/snoopytim.png" alt="Timothy pixel character" loading="lazy">
+            <img class="hand-title" src="text/title.png" alt="hi timothy suh. i made you a tiny website" loading="lazy">
+            <img class="char-sprite right" src="char/snoopysofia.png" alt="Sofia pixel character" loading="lazy">
+        </div>
+
+        <!-- Timer -->
+        <div class="timer" aria-live="polite">
+            <div class="pill"><span class="big" id="days">0</span><span class="label">days</span></div>
+            <div class="pill"><span class="big" id="hours">0</span><span class="label">hours</span></div>
+            <div class="pill"><span class="big" id="mins">0</span><span class="label">minutes</span></div>
+            <div class="pill"><span class="big" id="secs">0</span><span class="label">seconds</span></div>
+        </div>
+        <p class="sub" id="sinceText">of us being us ✨</p>
+
+        <!-- Reason + note -->
+        <div class="reason" id="reasonBox">tap below heuheuheheuh</div>
+        <div class="row">
+            <button id="reasonBtn">give me a reason</button>
+            <button class="ghost" id="toggleNoteBtn">surprise...</button>
+        </div>
+        <div class="note" id="note">
+            Dear <span id="hisNameNote">You</span>,<br><br>
+            i love you a lot more and more everyday. i want to cherish more memories together by your side. from your no
+            #1 supporter, lover, and best friend--i can't wait to see you again. love, sofia. ♡
+        </div>
+
+        <!-- Polaroid Photo Shuffler -->
+        <section class="gallery" aria-label="Photo shuffler">
+            <div class="photo-frame">
+                <img id="photoCurrent" alt="Us" loading="lazy" />
+                <div class="caption" id="photoCaption"></div>
+            </div>
+            <div class="controls">
+                <button class="icon-btn" id="prevPhotoBtn" title="Previous">⟵ Prev</button>
+                <button class="icon-btn filled" id="shufflePhotoBtn" title="Shuffle">Shuffle</button>
+                <button class="icon-btn" id="nextPhotoBtn" title="Next">Next ⟶</button>
+                <div class="spacer"></div>
+                <button class="icon-btn" id="playPauseBtn" title="Autoplay">▶︎ Play</button>
+                <span class="counter" id="photoCounter">0/0</span>
+            </div>
+        </section>
+
+        <!-- Mini Playlist Player -->
+        <section class="player" aria-label="Playlist player" tabindex="0">
+            <div class="player-meta">
+                <div class="player-cover" id="playerCoverBox">
+                    <img id="playerCover" alt="cover" />
+                    <span id="playerCoverPh">♪</span>
+                </div>
+                <div class="player-text">
+                    <div class="player-title" id="playerTitle">Your song</div>
+                    <div class="player-artist" id="playerArtist">Artist</div>
+                </div>
+            </div>
+
+            <div class="player-controls">
+                <button class="pbtn" id="btnPrev" title="previous">⟵ prev</button>
+                <button class="pbtn filled" id="btnPlay" title="play/pause">▶︎ play</button>
+                <button class="pbtn" id="btnNext" title="next">next ⟶</button>
+                <button class="pbtn" id="btnShuffle" title="Shuffle">shuffle</button>
+                <button class="pbtn" id="btnLoop" title="loop">↻ loop</button>
+            </div>
+
+            <div class="player-bar">
+                <span id="timeCur">0:00</span>
+                <input type="range" id="seek" min="0" max="100" value="0" step="0.1">
+                <span id="timeDur">0:00</span>
+            </div>
+
+            <div class="player-extra">
+                <label class="sub" for="vol">Volume</label>
+                <input type="range" id="vol" min="0" max="1" step="0.01" value="1" style="width:160px;">
+                <span class="sub" id="trackCounter">0/0</span>
+            </div>
+
+            <!-- Media elements -->
+            <audio id="audioEl" preload="metadata"></audio>
+            <video id="videoEl" preload="metadata" playsinline></video>
+        </section>
+
+        <footer id="footerText"></footer>
+    </main>
+
+    <script>
+        "use strict";
+
+        /* ========================
+           EDIT THESE
+        ========================== */
+        const MY_NAME = "sofia";
+        const HIS_NAME = "timothy";
+        const ANNIVERSARY_ISO = "2025-06-13T00:00:00"; // YYYY-MM-DDTHH:mm:ss
+
+        // Reasons to display
+        const REASONS = [
+            "you are like me in another body huehehe.",
+            "i love seeing you smile",
+            "you are my number #1 supporter",
+            "you never burn out my social energy",
+            "you care so much",
+            "your humor never fails to make me laugh!",
+            "you make me want to become a better person",
+            "you motivate me to do better",
+            "you is me twin",
+            "i could talk to you forever and never get bored"
+        ];
+
+        // Photos for the shuffler (replace src paths & captions with your own!)
+        const PHOTO_DATA = [
+            { src: "photos/IMG_7208.jpg", caption: "photoshoot time! ♡ " },
+            { src: "photos/IMG_1858.JPG", caption: "uniqlo mirror pic! ♡" },
+            { src: "photos/IMG_4850.JPG", caption: "sofia in dc! ♡" },
+            { src: "photos/IMG_4852.JPG", caption: "sofia in virginia! ♡" },
+            { src: "photos/IMG_4931.JPG", caption: "our second reunion hehe ♡" },
+            { src: "photos/IMG_6039.JPG", caption: "lotte time! ♡" }
+            // add more...
+        ];
+
+        /* ===== PLAYLIST CONFIG: add your files here =====
+           Put audio in /audio (mp3/m4a/ogg) and videos in /video (mp4/webm).
+           cover is optional; omit or leave "" to show the ♪ tile.
+        */
+        const TRACKS = [
+            { src: "audio/laufey1_8bit.mp3", title: "let you break my heart again", artist: "laufey", cover: "covers/laufey2.jpg", type: "audio" },
+            { src: "audio/laufey2_8bit.mp3", title: "bewitched", artist: "laufey", cover: "covers/laufey.jpg", type: "audio" },
+            { src: "audio/laufeywhile.mp3", title: "while you were sleeping", artist: "laufey", cover: "covers/laufey.jpg", type: "audio" },
+            { src: "audio/nothing (bruno major).mp3", title: "nothing", artist: "bruno major", cover: "covers/bruno.jpeg", type: "audio" }
+
+            // add more...
+        ];
+        /* ========================= */
+
+        // Personalize static text
+        document.getElementById("subtitle").innerHTML =
+            `from <b>${MY_NAME}</b> to <b>${HIS_NAME || "You"}</b>`;
+        document.getElementById("hisNameNote").textContent = HIS_NAME || "You";
+        document.getElementById("footerText").textContent = `Made with ♥ by ${MY_NAME}`;
+
+        // Live "since" timer
+        const start = new Date(ANNIVERSARY_ISO);
+        function updateTimer() {
+            const now = new Date();
+            const ms = Math.max(0, now - start);
+            const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
+            const mins = Math.floor((ms / (1000 * 60)) % 60);
+            const secs = Math.floor((ms / 1000) % 60);
+            document.getElementById("days").textContent = days;
+            document.getElementById("hours").textContent = hours;
+            document.getElementById("mins").textContent = mins;
+            document.getElementById("secs").textContent = secs;
+            document.getElementById("sinceText").textContent =
+                `since ${start.toLocaleDateString()} — and i’m loving u more each day`;
+        }
+        updateTimer();
+        setInterval(updateTimer, 1000);
+
+        // Heart confetti
+        function heartConfetti(count = 12) {
+            const EMOJI = ["♡", "ꨄ︎", "˚ʚ♡ɞ˚", "♥︎", "𝜗𝜚", "˚.🎀༘⋆", "💗ྀི"];
+            for (let i = 0; i < count; i++) {
+                const span = document.createElement("span");
+                span.className = "heart";
+                span.textContent = EMOJI[i % EMOJI.length];
+                span.style.left = Math.random() * 100 + "vw";
+                span.style.animationDuration = 1.3 + Math.random() * 1.2 + "s";
+                span.style.transform = `translateY(-20px) rotate(${Math.random() * 90 - 45}deg)`;
+                document.body.appendChild(span);
+                setTimeout(() => span.remove(), 2600);
+            }
+        }
+
+        // Reason button (avoid immediate repeats)
+        let lastReasonIdx = -1;
+        const box = document.getElementById("reasonBox");
+        document.getElementById("reasonBtn").addEventListener("click", () => {
+            if (!REASONS.length) return;
+            let idx;
+            do { idx = Math.floor(Math.random() * REASONS.length); }
+            while (REASONS.length > 1 && idx === lastReasonIdx);
+            lastReasonIdx = idx;
+            box.textContent = REASONS[idx];
+            heartConfetti(18);
+        });
+
+        // Surprise note toggle
+        const note = document.getElementById("note");
+        document.getElementById("toggleNoteBtn").addEventListener("click", () => {
+            note.classList.toggle("show");
+            heartConfetti(10);
+        });
+
+        /* ===== Polaroid Photo Shuffler ===== */
+        const photoEl = document.getElementById("photoCurrent");
+        const captionEl = document.getElementById("photoCaption");
+        const counterEl = document.getElementById("photoCounter");
+        const prevBtn = document.getElementById("prevPhotoBtn");
+        const nextBtn = document.getElementById("nextPhotoBtn");
+        const shuffleBtn = document.getElementById("shufflePhotoBtn");
+        const playPauseBtn = document.getElementById("playPauseBtn");
+        const frameEl = document.querySelector(".photo-frame");
+
+        let photoIndex = 0;
+        let autoTimer = null;
+        const AUTOPLAY_MS = 2500;
+
+        function preloadPhotos() {
+            PHOTO_DATA.forEach(p => { const img = new Image(); img.src = p.src; });
+        }
+
+        function applyRandomTilt() {
+            if (!frameEl) return;
+            const deg = (Math.random() * 4 - 2).toFixed(2); // -2° to +2°
+            frameEl.style.setProperty("--tilt", `${deg}deg`);
+        }
+
+        function renderPhoto() {
+            if (!PHOTO_DATA.length) {
+                captionEl.textContent = "Add photos to PHOTO_DATA";
+                counterEl.textContent = "0/0";
+                photoEl.removeAttribute("src");
+                return;
+            }
+            const item = PHOTO_DATA[photoIndex];
+
+            photoEl.classList.remove("show");
+            photoEl.onload = () => requestAnimationFrame(() => photoEl.classList.add("show"));
+            photoEl.onerror = () => {
+                captionEl.textContent = "Couldn’t load this photo";
+                photoEl.classList.add("show");
+            };
+            photoEl.src = item.src;
+            photoEl.alt = item.caption || "Us";
+            captionEl.textContent = item.caption || "";
+            counterEl.textContent = `${photoIndex + 1}/${PHOTO_DATA.length}`;
+            applyRandomTilt();
+        }
+
+        function showNextPhoto(step = 1) {
+            if (!PHOTO_DATA.length) return;
+            photoIndex = (photoIndex + step + PHOTO_DATA.length) % PHOTO_DATA.length;
+            renderPhoto();
+            try { heartConfetti(6); } catch { }
+        }
+        function showPrevPhoto() { showNextPhoto(-1); }
+
+        function shufflePhoto() {
+            if (!PHOTO_DATA.length) return;
+            let idx = Math.floor(Math.random() * PHOTO_DATA.length);
+            if (PHOTO_DATA.length > 1 && idx === photoIndex) idx = (idx + 1) % PHOTO_DATA.length;
+            photoIndex = idx;
+            renderPhoto();
+            try { heartConfetti(8); } catch { }
+        }
+
+        function setAutoplay(on) {
+            if (on) {
+                if (autoTimer) return;
+                autoTimer = setInterval(() => showNextPhoto(1), AUTOPLAY_MS);
+                playPauseBtn.textContent = "⏸ Pause";
+                playPauseBtn.classList.add("filled");
+            } else {
+                clearInterval(autoTimer);
+                autoTimer = null;
+                playPauseBtn.textContent = "▶︎ Play";
+                playPauseBtn.classList.remove("filled");
+            }
+        }
+
+        // Controls
+        prevBtn.addEventListener("click", () => { setAutoplay(false); showPrevPhoto(); });
+        nextBtn.addEventListener("click", () => { setAutoplay(false); showNextPhoto(); });
+        shuffleBtn.addEventListener("click", () => { setAutoplay(false); shufflePhoto(); });
+        playPauseBtn.addEventListener("click", () => setAutoplay(!autoTimer));
+
+        // Keyboard shortcuts: ← → to navigate, space to play/pause
+        document.addEventListener("keydown", (e) => {
+            if (e.target && ["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
+            if (e.key === "ArrowRight") { setAutoplay(false); showNextPhoto(); }
+            else if (e.key === "ArrowLeft") { setAutoplay(false); showPrevPhoto(); }
+            else if (e.key === " ") { e.preventDefault(); setAutoplay(!autoTimer); }
+        });
+
+        // Init gallery
+        preloadPhotos();
+        renderPhoto();
+        // setAutoplay(true);
+
+        /* ===== Mini Playlist Player ===== */
+        const audioEl = document.getElementById("audioEl");
+        const videoEl = document.getElementById("videoEl");
+        const btnPlay = document.getElementById("btnPlay");
+        const btnPrev = document.getElementById("btnPrev");
+        const btnNext = document.getElementById("btnNext");
+        const btnShuffle = document.getElementById("btnShuffle");
+        const btnLoop = document.getElementById("btnLoop");
+        const seek = document.getElementById("seek");
+        const vol = document.getElementById("vol");
+        const timeCur = document.getElementById("timeCur");
+        const timeDur = document.getElementById("timeDur");
+        const titleEl = document.getElementById("playerTitle");
+        const artistEl = document.getElementById("playerArtist");
+        const coverEl = document.getElementById("playerCover");
+        const coverBox = document.getElementById("playerCoverBox");
+        const trackCounter = document.getElementById("trackCounter");
+        const playerSection = document.querySelector(".player");
+
+        let idxTrack = 0;
+        let isPlaying = false;
+        let isShuffle = JSON.parse(localStorage.getItem("player.shuffle") || "true");
+        let isLoop = JSON.parse(localStorage.getItem("player.loop") || "false");
+        let savedVol = parseFloat(localStorage.getItem("player.volume") || "0.9");
+        vol.value = String(savedVol);
+        audioEl.volume = savedVol; videoEl.volume = savedVol;
+
+        updateToggleUi();
+
+        function fmt(t) {
+            if (!isFinite(t)) return "0:00";
+            const m = Math.floor(t / 60), s = Math.floor(t % 60);
+            return `${m}:${String(s).padStart(2, "0")}`;
+        }
+        function isVideoTrack(track) {
+            return track.type === "video" || /\.mp4$|\.webm$/i.test(track.src);
+        }
+        function setMediaSource(track) {
+            const isVid = isVideoTrack(track);
+            audioEl.pause(); videoEl.pause();
+            audioEl.src = ""; videoEl.src = "";
+            if (isVid) {
+                videoEl.src = track.src; videoEl.classList.add("show");
+                audioEl.style.display = "none";
+            } else {
+                audioEl.src = track.src; videoEl.classList.remove("show");
+                audioEl.style.display = "";
+            }
+        }
+
+        function renderTrack() {
+            if (!TRACKS.length) return;
+            const t = TRACKS[idxTrack];
+            titleEl.textContent = t.title || "Untitled";
+            artistEl.textContent = t.artist || "";
+            trackCounter.textContent = `${idxTrack + 1}/${TRACKS.length}`;
+
+            // cover (toggle class so the img stays mounted)
+            if (t.cover) {
+                coverEl.src = t.cover;
+                coverBox.classList.add("has-cover");
+            } else {
+                coverEl.removeAttribute("src");
+                coverBox.classList.remove("has-cover");
+            }
+
+            setMediaSource(t);
+
+            // When metadata loads, update duration & time handlers
+            const el = currentEl();
+            el.onloadedmetadata = () => {
+                timeDur.textContent = fmt(el.duration || 0);
+                seek.value = 0;
+                attachTimeUpdates();
+            };
+        }
+
+        function currentEl() {
+            return (videoEl.classList.contains("show")) ? videoEl : audioEl;
+        }
+
+        async function playPause() {
+            const el = currentEl();
+            try {
+                if (!isPlaying) {
+                    await el.play();
+                    isPlaying = true;
+                    btnPlay.textContent = "⏸ Pause";
+                    btnPlay.classList.add("filled");
+                    try { heartConfetti(6); } catch { }
+                } else {
+                    el.pause();
+                    isPlaying = false;
+                    btnPlay.textContent = "▶︎ Play";
+                    btnPlay.classList.remove("filled");
+                }
+            } catch (e) {
+                alert("Tap once to allow media to play, then try again ❤️");
+            }
+        }
+
+        function nextTrack(manual = true) {
+            if (!TRACKS.length) return;
+            if (isShuffle) {
+                let n = Math.floor(Math.random() * TRACKS.length);
+                if (TRACKS.length > 1 && n === idxTrack) n = (n + 1) % TRACKS.length;
+                idxTrack = n;
+            } else {
+                idxTrack = (idxTrack + 1) % TRACKS.length;
+            }
+            isPlaying = false;
+            renderTrack();
+            if (manual) playPause();
+        }
+
+        function prevTrack() {
+            if (!TRACKS.length) return;
+            if (isShuffle) {
+                let n = Math.floor(Math.random() * TRACKS.length);
+                if (TRACKS.length > 1 && n === idxTrack) n = (n + TRACKS.length - 1) % TRACKS.length;
+                idxTrack = n;
+            } else {
+                idxTrack = (idxTrack - 1 + TRACKS.length) % TRACKS.length;
+            }
+            isPlaying = false;
+            renderTrack();
+            playPause();
+        }
+
+        function updateToggleUi() {
+            btnShuffle.classList.toggle("filled", isShuffle);
+            btnLoop.classList.toggle("filled", isLoop);
+        }
+
+        function attachTimeUpdates() {
+            const el = currentEl();
+            el.ontimeupdate = () => {
+                timeCur.textContent = fmt(el.currentTime || 0);
+                if (!seek._dragging && el.duration) {
+                    seek.value = (el.currentTime / el.duration) * 100;
+                }
+            };
+            el.onended = () => {
+                if (isLoop) { el.currentTime = 0; playPause(); return; }
+                nextTrack(false);
+                playPause();
+            };
+        }
+
+        btnPlay.addEventListener("click", playPause);
+        btnNext.addEventListener("click", () => { nextTrack(); });
+        btnPrev.addEventListener("click", () => { prevTrack(); });
+
+        btnShuffle.addEventListener("click", () => {
+            isShuffle = !isShuffle;
+            localStorage.setItem("player.shuffle", JSON.stringify(isShuffle));
+            updateToggleUi();
+        });
+        btnLoop.addEventListener("click", () => {
+            isLoop = !isLoop;
+            localStorage.setItem("player.loop", JSON.stringify(isLoop));
+            updateToggleUi();
+        });
+
+        seek.addEventListener("input", () => {
+            const el = currentEl();
+            if (el.duration) el.currentTime = (seek.value / 100) * el.duration;
+        });
+        seek.addEventListener("mousedown", () => seek._dragging = true);
+        seek.addEventListener("mouseup", () => seek._dragging = false);
+        seek.addEventListener("touchstart", () => seek._dragging = true, { passive: true });
+        seek.addEventListener("touchend", () => seek._dragging = false);
+
+        vol.addEventListener("input", () => {
+            const v = parseFloat(vol.value);
+            audioEl.volume = v; videoEl.volume = v;
+            localStorage.setItem("player.volume", String(v));
+        });
+
+        // Keyboard shortcuts inside the player: space / ← / →
+        // Keyboard shortcuts inside the player: space / ← / →
+        playerSection.addEventListener("keydown", (e) => {
+            if (e.key === " ") { e.preventDefault(); playPause(); }
+            else if (e.key === "ArrowRight") { nextTrack(); }
+            else if (e.key === "ArrowLeft") { prevTrack(); }
+        });
+
+
+        // Init player
+        renderTrack();
+        audioEl.addEventListener("loadedmetadata", attachTimeUpdates);
+        videoEl.addEventListener("loadedmetadata", attachTimeUpdates);
+
+        /* ===== Button SFX: click for all, sparkle for surprise ===== */
+        (function () {
+            'use strict';
+
+            const CLICK_PATH = 'fx/click.wav';
+            const SPARKLE_PATH = 'fx/sparkle.wav';
+
+            let clickMaster = null;
+            let sparkleMaster = null;
+
+            function ensureAudio(path, which) {
+                if (which === 'click' && clickMaster) return clickMaster;
+                if (which === 'sparkle' && sparkleMaster) return sparkleMaster;
+                const a = new Audio();
+                a.src = path;
+                a.preload = 'auto';
+                a.volume = which === 'sparkle' ? 0.5 : 0.35; // tweak volumes here
+                if (which === 'click') clickMaster = a; else sparkleMaster = a;
+                return a;
+            }
+
+            function playSfx(which) {
+                try {
+                    const base = ensureAudio(which === 'sparkle' ? SPARKLE_PATH : CLICK_PATH, which);
+                    const node = base.cloneNode(); // allow overlapping sounds
+                    node.volume = base.volume;
+                    node.currentTime = 0;
+                    node.play().catch(() => { });
+                } catch { }
+            }
+
+            // Unlock audio on first gesture (iOS/Android)
+            window.addEventListener('pointerdown', () => {
+                ensureAudio(CLICK_PATH, 'click');
+                ensureAudio(SPARKLE_PATH, 'sparkle');
+            }, { once: true, passive: true });
+
+            // Play sounds on button clicks
+            document.addEventListener('click', (e) => {
+                const btn = e.target.closest('button');
+                if (!btn || btn.disabled) return;
+                if (btn.id === 'toggleNoteBtn') {
+                    playSfx('sparkle');   // surprise button ✨
+                } else {
+                    playSfx('click');     // all other buttons
+                }
+            });
+        })();
+
+    </script>
+    <!-- ONE Timington (classic panel) + toy/woof SFX -->
+    <script>
+        (() => {
+            'use strict';
+
+            // Remove any previous tama panels
+            document.querySelectorAll('.tama').forEach(el => el.remove());
+
+            // Inject classic panel CSS (once)
+            if (!document.getElementById('tama-css')) {
+                const st = document.createElement('style');
+                st.id = 'tama-css';
+                st.textContent = `
+      .tama{margin:16px 0 8px;background:#fffaf5;border:3px solid #3a2f2f;border-radius:0;box-shadow:4px 4px 0 #c7b8b8;padding:12px}
+      .tama-row{display:flex;align-items:center;gap:12px}
+      .tama-sprite{width:96px;height:96px;image-rendering:pixelated;image-rendering:crisp-edges;border:0}
+      .tama-panel{flex:1}
+      .tama-name{font-weight:400;margin-bottom:6px}
+      .tama-bars{display:grid;gap:6px}
+      .tama-bar{display:grid;grid-template-columns:72px 1fr min-content;align-items:center;gap:6px}
+      .tama-bar .label{font-size:12px;opacity:.8}
+      .tama-meter{height:12px;background:#ffe3ef;border:2px solid #3a2f2f;box-shadow:inset 0 -2px 0 rgba(0,0,0,.06);position:relative}
+      .tama-fill{height:100%;background:#ff9ec0;width:50%}
+      .tama-val{font-size:12px;min-width:34px;text-align:right}
+      .tama-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+      .tbtn{border:3px solid #3a2f2f;border-radius:0;background:#ffd6e6;color:#1f1f1f;padding:6px 10px;box-shadow:4px 4px 0 #c7b8b8;cursor:pointer}
+      .tbtn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #c7b8b8}
+      .tbtn[disabled]{opacity:.5;filter:grayscale(1);pointer-events:none}
+    `;
+                document.head.appendChild(st);
+            }
+
+            // Insert panel
+            const host = document.querySelector('main.card') || document.body;
+            const sec = document.createElement('section');
+            sec.className = 'tama';
+            sec.setAttribute('aria-label', 'tamagotchi');
+            sec.innerHTML = `
+    <div class="tama-row">
+      <img id="tamaSprite" class="tama-sprite" src="char/timington_idle.png" alt="Timington">
+      <div class="tama-panel">
+        <div class="tama-name">
+          pet: <span id="tamaName">TIMINGTON</span>
+          <button id="tamaRename" class="tbtn" style="margin-left:8px">rename</button>
+        </div>
+
+        <div class="tama-bars">
+          <div class="tama-bar"><span class="label">HUNGER</span>
+            <div class="tama-meter"><div id="tamaHunger" class="tama-fill"></div></div>
+            <span id="tamaHungerVal" class="tama-val">80</span></div>
+
+          <div class="tama-bar"><span class="label">HAPPY</span>
+            <div class="tama-meter"><div id="tamaHappy" class="tama-fill"></div></div>
+            <span id="tamaHappyVal" class="tama-val">80</span></div>
+
+          <div class="tama-bar"><span class="label">ENERGY</span>
+            <div class="tama-meter"><div id="tamaEnergy" class="tama-fill"></div></div>
+            <span id="tamaEnergyVal" class="tama-val">80</span></div>
+
+          <div class="tama-bar"><span class="label">CLEAN</span>
+            <div class="tama-meter"><div id="tamaClean" class="tama-fill"></div></div>
+            <span id="tamaCleanVal" class="tama-val">80</span></div>
+        </div>
+
+        <div class="tama-buttons">
+          <button id="tamaFeed" class="tbtn">feed</button>
+          <button id="tamaPlay" class="tbtn">play</button>
+          <button id="tamaBath" class="tbtn">bath</button>
+          <button id="tamaSleep" class="tbtn">sleep</button>
+        </div>
+      </div>
+    </div>
+  `;
+            const gallery = document.querySelector('.gallery');
+            if (gallery) host.insertBefore(sec, gallery); else host.appendChild(sec);
+
+            // Sprites (preload)
+            const SPRITES = {
+                idle: "char/timington_idle.png",
+                happy: "char/timington_happy.png",
+                sleep: "char/timington_sleep.png",
+                shower: "char/timington_shower.png"
+            };
+            Object.values(SPRITES).forEach(s => { const i = new Image(); i.src = s; });
+
+            // SFX
+            const TOY_SND = "fx/toy.wav";
+            const WOOF_SND = "fx/woof.wav";
+            function playSfx(path) {
+                try {
+                    const a = new Audio(path);
+                    a.volume = parseFloat(localStorage.getItem("player.volume") || "0.9");
+                    a.play().catch(() => { });
+                } catch { }
+            }
+            // Light unlock on first gesture (mobile)
+            window.addEventListener('pointerdown', () => {
+                [TOY_SND, WOOF_SND].forEach(p => { const a = new Audio(p); a.muted = true; a.play().finally(() => a.pause()); });
+            }, { once: true, passive: true });
+
+            // State
+            const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+            const now = () => Date.now();
+            const KEY = "timington.v1";
+            let S = load();
+            function load() {
+                try { const raw = localStorage.getItem(KEY); if (raw) return JSON.parse(raw); } catch { }
+                return { name: "TIMINGTON", hunger: 80, happy: 80, energy: 80, clean: 80, asleep: false, last: now(), temp: "idle" };
+            }
+            function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { } }
+
+            // Els
+            const sprite = sec.querySelector('#tamaSprite');
+            const nameEl = sec.querySelector('#tamaName');
+            const hungerEl = sec.querySelector('#tamaHunger'), hungerVal = sec.querySelector('#tamaHungerVal');
+            const happyEl = sec.querySelector('#tamaHappy'), happyVal = sec.querySelector('#tamaHappyVal');
+            const energyEl = sec.querySelector('#tamaEnergy'), energyVal = sec.querySelector('#tamaEnergyVal');
+            const cleanEl = sec.querySelector('#tamaClean'), cleanVal = sec.querySelector('#tamaCleanVal');
+
+            const btnFeed = sec.querySelector('#tamaFeed');
+            const btnPlay = sec.querySelector('#tamaPlay');
+            const btnBath = sec.querySelector('#tamaBath');
+            const btnSleep = sec.querySelector('#tamaSleep');
+            const btnRename = sec.querySelector('#tamaRename');
+
+            let tempTimer = null;
+
+            function setSprite(kind) {
+                let src = SPRITES.idle;
+                if (S.asleep) src = SPRITES.sleep;
+                else {
+                    if (kind === 'happy') src = SPRITES.happy;
+                    if (kind === 'shower') src = SPRITES.shower;
+                }
+                sprite.onerror = () => { sprite.src = SPRITES.idle; };
+                sprite.src = src;
+            }
+            function showTemp(kind, ms = 2500) {
+                if (S.asleep) return;
+                clearTimeout(tempTimer);
+                S.temp = kind;
+                setSprite(kind);
+                tempTimer = setTimeout(() => { S.temp = 'idle'; setSprite('idle'); }, ms);
+            }
+            function refreshUI() {
+                nameEl.textContent = S.name;
+                hungerEl.style.width = S.hunger + '%'; hungerVal.textContent = Math.round(S.hunger);
+                happyEl.style.width = S.happy + '%'; happyVal.textContent = Math.round(S.happy);
+                energyEl.style.width = S.energy + '%'; energyVal.textContent = Math.round(S.energy);
+                cleanEl.style.width = S.clean + '%'; cleanVal.textContent = Math.round(S.clean);
+                setSprite(S.asleep ? 'sleep' : S.temp);
+                [btnFeed, btnPlay, btnBath].forEach(b => b.disabled = S.asleep);
+                btnSleep.textContent = S.asleep ? 'wake' : 'sleep';
+            }
+            function decay(dt) {
+                const r = S.asleep
+                    ? { hunger: -0.02, happy: -0.015, energy: +0.10, clean: -0.01 }
+                    : { hunger: -0.06, happy: -0.05, energy: -0.05, clean: -0.03 };
+                S.hunger = clamp(S.hunger + r.hunger * dt, 0, 100);
+                S.happy = clamp(S.happy + r.happy * dt, 0, 100);
+                S.energy = clamp(S.energy + r.energy * dt, 0, 100);
+                S.clean = clamp(S.clean + r.clean * dt, 0, 100);
+            }
+            function tick() {
+                const t = now(); const dt = Math.min(30, (t - S.last) / 1000);
+                S.last = t; decay(dt); refreshUI(); save();
+            }
+
+            // Actions (with SFX) — block bubbling so global click.wav doesn't fire
+            btnFeed.addEventListener('click', (e) => {
+                e.stopImmediatePropagation?.(); e.stopPropagation();
+                S.hunger = clamp(S.hunger + 22, 0, 100);
+                S.clean = clamp(S.clean - 6, 0, 100);
+                playSfx(WOOF_SND);
+                showTemp('happy');
+                try { heartConfetti?.(8) } catch { }
+                refreshUI();
+            });
+
+            btnPlay.addEventListener('click', (e) => {
+                e.stopImmediatePropagation?.(); e.stopPropagation();
+                S.happy = clamp(S.happy + 18, 0, 100);
+                S.energy = clamp(S.energy - 10, 0, 100);
+                S.hunger = clamp(S.hunger - 4, 0, 100);
+                playSfx(TOY_SND);     // ← toy.wav here
+                showTemp('happy');
+                try { heartConfetti?.(10) } catch { }
+                refreshUI();
+            });
+
+            btnBath.addEventListener('click', (e) => {
+                e.stopImmediatePropagation?.(); e.stopPropagation();
+                S.clean = clamp(S.clean + 28, 0, 100);
+                playSfx(WOOF_SND);
+                showTemp('shower', 2500);
+                refreshUI();
+            });
+
+            btnSleep.addEventListener('click', (e) => {
+                e.stopImmediatePropagation?.(); e.stopPropagation();
+                S.asleep = !S.asleep;
+                playSfx(WOOF_SND);
+                if (!S.asleep) S.temp = 'idle';
+                refreshUI();
+            });
+
+            btnRename.addEventListener('click', (e) => {
+                e.stopImmediatePropagation?.(); e.stopPropagation();
+                const n = prompt("Pet name?", S.name);
+                if (n) { S.name = n.trim().slice(0, 12).toUpperCase(); refreshUI(); save(); }
+            });
+
+            // Start
+            refreshUI();
+            setInterval(tick, 1500);
+        })();
+    </script>
+
+
+
+
+
+</body>
+
+</html>
